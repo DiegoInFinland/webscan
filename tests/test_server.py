@@ -1,9 +1,10 @@
 from unittest.mock import patch, MagicMock
 import subprocess
-from server import nmap_execute, nmap_scan, ping_scan, ping6_scan, CmdExec, validate_ports, whatweb_execute, whatweb_scan
+from scan import nmap_execute, CmdExec, validate_ports, whatweb_execute
+from server import nmap_scan, ping_scan, ping6_scan, whatweb_scan
 
 def test_nmap_execute_returns_stdout_stderr_returncode():
-    with patch("server.subprocess.Popen") as mock_popen:
+    with patch("scan.subprocess.Popen") as mock_popen:
         proc = MagicMock()
         proc.communicate.return_value = ("nmap output", "")
         proc.returncode = 0
@@ -32,7 +33,7 @@ def test_nmap_execute_empty_list():
 
 
 def test_nmap_execute_timeout():
-    with patch("server.subprocess.Popen") as mock_popen:
+    with patch("scan.subprocess.Popen") as mock_popen:
         proc = MagicMock()
         proc.communicate.side_effect = subprocess.TimeoutExpired(cmd="nmap", timeout=300)
         mock_popen.return_value = proc
@@ -43,7 +44,7 @@ def test_nmap_execute_timeout():
 
 
 def test_nmap_execute_unexpected_error():
-    with patch("server.subprocess.Popen") as mock_popen:
+    with patch("scan.subprocess.Popen") as mock_popen:
         mock_popen.side_effect = Exception("nmap not found")
 
         result = nmap_execute(["scanme.nmap.org"])
@@ -52,7 +53,7 @@ def test_nmap_execute_unexpected_error():
 
 
 def test_whatweb_execute_returns_stdout_stderr_returncode():
-    with patch("server.subprocess.Popen") as mock_popen:
+    with patch("scan.subprocess.Popen") as mock_popen:
         proc = MagicMock()
         proc.communicate.return_value = ("whatweb output", "")
         proc.returncode = 0
@@ -216,7 +217,7 @@ def test_nmap_scan_invalid_ports_rejected():
 
 
 def test_cmdexec_execute_returns_dict():
-    with patch("server.subprocess.Popen") as mock_popen:
+    with patch("scan.subprocess.Popen") as mock_popen:
         proc = MagicMock()
         proc.communicate.return_value = ("output", "error")
         proc.returncode = 1

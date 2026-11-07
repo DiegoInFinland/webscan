@@ -27,7 +27,7 @@ Docker Container (kalilinux/kali-rolling)
 
 ## Quick Start
 
-> **Branch note:** `curl_request` and `whatweb_scan` are available on `develop` only. Check out `develop` before building the image to use them; `main` currently provides only the Nmap tools.
+> **Branch note:** for latest additions or new tools, check `develop` branch.
 
 Build the new image, then edit your AI configuration file in order to use it with your agent. See below for configuration example.
 
