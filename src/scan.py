@@ -1,7 +1,7 @@
 import subprocess
+import random 
 from typing import List, Dict, Any  
-
-TIMEOUT = 300
+from conf import TIMEOUT, USER_AGENTS 
 
 class CmdExec: 
     def __init__(self, cmd, timeout=TIMEOUT): 
@@ -61,7 +61,7 @@ def validate_ports(ports: str) -> bool:
 
 
 def curl_execute(args: List[str]) -> Dict[str, Any]:
-    curl_cmd = ["curl"] + args 
+    curl_cmd = ["curl", "-A", random.choice(USER_AGENTS), *args]  
     try:
         cmd_exec = CmdExec(curl_cmd)
         return cmd_exec.execute()

@@ -3,16 +3,12 @@ import logging
 import sys
 from scan import curl_execute, nmap_execute, validate_ports, whatweb_execute
 from typing import Dict, Any, List 
+from conf import DENY_FLAGS
 
 logging.basicConfig(level=logging.WARNING, stream=sys.stderr)
 logging.getLogger("mcp").setLevel(logging.WARNING)
+
 mcp = FastMCP('nmap-scanner')
-
-# Deny list of file output flags (not needed since results are returned as JSON)
-DENY_FLAGS = {
-    "-oN", "-oX", "-oG", "-oS", "-oA", "--output-xml"
-}
-
 
 @mcp.tool()
 def local_ip() -> Dict[str, Any]:
