@@ -1,5 +1,5 @@
 ---
-name: nmap-scan-skill
+name: webscan
 description: Professional network reconnaissance and port scanning. Use when the user needs to scan a certain IP or DNS for open ports, service versions, OS fingerprints, networks among other details on a target IP or hostname. Or when the user explicitly asks for it. Scans can use IPv4 or IPv6. Aditionally, curl requests can be made to a specific URL with optional flags. The skill is designed to be used in a controlled and ethical manner, ensuring that scans are performed only on authorized targets.
 ---
 

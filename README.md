@@ -1,13 +1,13 @@
-# Nmap MCP Server
+# Webscan MCP Server
 
 > **Disclaimer:** This is a personal project, and still a work in progress, and is not intended for production in real environments. Use at your own risk!
 
-Dockerized Kali Linux container that exposes Nmap, curl, and WhatWeb as very small and lightweight [MCP (Model Context Protocol)](https://modelcontextprotocol.io) tools for AI agents.
+Dockerized Kali Linux container that exposes Nmap, curl, and WhatWeb as lightweight [MCP (Model Context Protocol)](https://modelcontextprotocol.io) tools for AI agents. Only scan targets you are authorized to assess.
 
 ## Architecture
 
 ```
-AI Client (Claude, etc.)
+AI Client (MCP-compatible)
     │  MCP protocol (stdio)
     ▼
 Docker Container (kalilinux/kali-rolling)
@@ -16,7 +16,7 @@ Docker Container (kalilinux/kali-rolling)
     ├── src/server.py  (FastMCP server)
     │   ├── @mcp.tool()  →  local_ip()
     │   ├── @mcp.tool()  →  nmap_scan(target, flags, ports)
-    │   ├── @mcp.tool()  →  ping_scan(target)
+    │   ├── @mcp.tool()  →  ping_scan(target, disable_arp_ping=False)
     │   ├── @mcp.tool()  →  ping6_scan(target)
     │   ├── @mcp.tool()  →  curl_request(flags, url)
     │   └── @mcp.tool()  →  whatweb_scan(flags, url)
@@ -27,49 +27,50 @@ Docker Container (kalilinux/kali-rolling)
 
 ## Quick Start
 
-> **Branch note:** for latest additions or new tools, check `develop` branch.
-
-Build the new image, then edit your AI configuration file in order to use it with your agent. See below for configuration example.
+Run these commands from the `webscan` project root. Build the image, then configure your MCP client to launch it.
 
 ### Prerequisites
 
 - Docker
+- `uv` (only for local development)
 
 ### Build the Docker image
 
 ```bash
 # Build the image (prod stage is default)
-docker build -t nmap-mcp-server .
+docker build -t webscan .
 
 # Run (stdio-based MCP server)
-docker run --rm --network host -i nmap-mcp-server
+docker run --rm --network host -i webscan
 
 # Dev — run tests
-docker build --target dev -t nmap-mcp-server-dev .
-docker run --rm nmap-mcp-server-dev
+docker build --target dev -t webscan-dev .
+docker run --rm webscan-dev
 ```
 
 ### Configure your Agent
 
-Add to your MCP client config (e.g., `claude_desktop_config.json` or `opencode.json`):
+For a client that uses the `mcpServers` format (for example, Claude Desktop), add:
 
 ```json
 {
   "mcpServers": {
-    "nmap-mcp-server": {
+    "webscan": {
       "command": "docker",
-      "args": ["run", "--rm", "--network", "host", "-i", "nmap-mcp-server"]
+      "args": ["run", "--rm", "--network", "host", "-i", "webscan"]
     }
   }
 }
 ```
 
-### 3. Optionally verify Connection
+On macOS and Windows, Docker runs in a VM: `--network host` does not necessarily expose the host's LAN interface to the container. Check `local_ip` and supply the intended subnet explicitly before discovery scans.
+
+### Optionally verify the connection
 
 Test the server manually using the MCP Inspector:
 
 ```bash
-npx @modelcontextprotocol/inspector docker run -i --rm nmap-mcp-server
+npx @modelcontextprotocol/inspector docker run --rm --network host -i webscan
 ```
 
 ## Usage examples
@@ -90,10 +91,10 @@ Identify the specific versions of software running on open ports.
 
 ### 3. Security Audit (Port Range)
 
-Perform a stealthy scan on a specific range of ports to identify vulnerabilities.
+Scan a specific port range on an authorized target.
 
-- **Prompt to Agent:** "Perform a stealth SYN scan on scanme.nmap.org for ports 1 to 1000."
-- **Agent Action:** Calls `nmap_scan(target="scanme.nmap.org", flags="-sS", ports="1-1000")`.
+- **Prompt to Agent:** "Scan ports 1 to 1000 on my authorized test host."
+- **Agent Action:** Calls `nmap_scan(target="test.example.com", ports="1-1000")`.
 
 ### 4. Web Fingerprinting
 
@@ -107,19 +108,20 @@ Fingerprint a web target with WhatWeb or make a specific HTTP request with curl.
 
 AI agents can chain these tools together in a single conversation:
 
-1.  **Discover**: Use `ping_scan` to find a target.
-2.  **Scan**: Use `nmap_scan` to find open ports.
-3.  **Fingerprint**: Use `whatweb_scan` or `curl_request` for web targets.
-4.  **Analyze**: The agent interprets the `stdout` and suggests next steps based on the `security-researcher` persona.
+1. **Discover**: Use `ping_scan` to find hosts in an authorized range.
+2. **Select**: Confirm which hosts may be scanned further.
+3. **Scan**: Use `nmap_scan` to find open ports.
+4. **Fingerprint**: Use `whatweb_scan` or `curl_request` for web targets.
+5. **Analyze**: Interpret the `stdout`, `stderr`, and `returncode` returned by each tool.
 
 ## Development
 
 ```bash
-# Mount local source for hot-reload
+# Mount local source and run the MCP server in Docker
 ./run_dev.sh
 ```
 
-The project root is volume-mounted so code changes take effect without rebuilding.
+The project root is volume-mounted so code changes take effect on the next run without rebuilding. Build the `webscan` image first.
 
 Or run directly:
 

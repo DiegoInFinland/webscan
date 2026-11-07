@@ -6,7 +6,7 @@ from typing import Dict, Any, List
 
 logging.basicConfig(level=logging.WARNING, stream=sys.stderr)
 logging.getLogger("mcp").setLevel(logging.WARNING)
-mcp = FastMCP('nmap-scanner')
+mcp = FastMCP('webscan')
 
 # Deny list of file output flags (not needed since results are returned as JSON)
 DENY_FLAGS = {
