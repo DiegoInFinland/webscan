@@ -3,10 +3,10 @@ FROM kalilinux/kali-rolling AS python-deps
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV UV_LINK_MODE=copy \
-    #PYTHONUNBUFFERED=1 \
-    #PYTHONWARNINGS=ignore \
-    #UV_QUIET=1
-    UV_COMPILE_BYTECODE=1 
+    PYTHONUNBUFFERED=1 \
+    PYTHONWARNINGS=ignore \
+    UV_QUIET=1
+#UV_COMPILE_BYTECODE=1 
 RUN apt update && apt install -y --no-install-recommends \
     build-essential libffi-dev pkg-config \
     nmap whatweb curl \

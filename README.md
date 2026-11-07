@@ -129,8 +129,3 @@ Or run directly:
 uv sync
 uv run src/server.py
 ```
-
-## Dependencies
-
-- `mcp[cli]>=1.27.0`
-- `pytest>=9.0.3` (dev)
